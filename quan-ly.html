@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quản lý — HCMC Metro</title>
+<link rel="stylesheet" href="assets/css/style.css">
+<style>
+  .bar-chart { display:flex; align-items:flex-end; gap:10px; height:180px; padding-top:10px; }
+  .bar-chart .bar-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .bar-chart .bar { width:100%; background: linear-gradient(180deg, var(--blue-500), var(--blue-700)); border-radius: 6px 6px 0 0; min-height:4px; }
+  .bar-chart .bar-label { font-size:0.7rem; color:var(--ink-500); }
+  .promo-edit-card { border: 1.5px solid var(--line-soft); border-radius: var(--radius-md); padding: 16px; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">M1</div>
+      <div class="brand-text"><strong>HCMC Metro</strong><span>Quản lý / Admin</span></div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Tổng quan</div>
+      <button class="nav-item active" data-tab="tab-dashboard" data-label="Dashboard tổng quan" onclick="showTab('tab-dashboard', this)">📊 Dashboard tổng quan</button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Báo cáo</div>
+      <button class="nav-item" data-tab="tab-revenue-report" data-label="Báo cáo doanh thu" onclick="showTab('tab-revenue-report', this)">💰 Báo cáo doanh thu</button>
+      <button class="nav-item" data-tab="tab-recon" data-label="Đối soát thanh toán" onclick="showTab('tab-recon', this)">🧮 Đối soát thanh toán</button>
+      <button class="nav-item" data-tab="tab-hr-report" data-label="Báo cáo nhân sự" onclick="showTab('tab-hr-report', this)">📋 Báo cáo nhân sự</button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Quản lý vận hành</div>
+      <button class="nav-item" data-tab="tab-stations-admin" data-label="Quản lý tuyến & ga" onclick="showTab('tab-stations-admin', this)">🗺️ Quản lý tuyến & ga</button>
+      <button class="nav-item" data-tab="tab-maintenance" data-label="Bảo trì & sự cố" onclick="showTab('tab-maintenance', this)">🛠️ Bảo trì & sự cố</button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Quản lý người dùng</div>
+      <button class="nav-item" data-tab="tab-customers-admin" data-label="Quản lý khách hàng" onclick="showTab('tab-customers-admin', this)">👥 Quản lý khách hàng</button>
+      <button class="nav-item" data-tab="tab-staff-admin" data-label="Quản lý nhân viên" onclick="showTab('tab-staff-admin', this)">🧑‍💼 Quản lý nhân viên</button>
+      <button class="nav-item" data-tab="tab-shifts-admin" data-label="Phân ca làm việc" onclick="showTab('tab-shifts-admin', this)">📅 Phân ca làm việc</button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Kinh doanh</div>
+      <button class="nav-item" data-tab="tab-promo-admin" data-label="Quản lý khuyến mãi" onclick="showTab('tab-promo-admin', this)">🎁 Quản lý khuyến mãi</button>
+      <button class="nav-item" data-tab="tab-feedback-admin" data-label="Phản hồi khách hàng" onclick="showTab('tab-feedback-admin', this)">⭐ Phản hồi khách hàng</button>
+      <button class="nav-item" data-tab="tab-lostfound-admin" data-label="Lost & Found" onclick="showTab('tab-lostfound-admin', this)">🧳 Lost & Found</button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Hệ thống</div>
+      <button class="nav-item" data-tab="tab-notif-admin" data-label="Gửi thông báo" onclick="showTab('tab-notif-admin', this)">📢 Gửi thông báo</button>
+      <button class="nav-item" data-tab="tab-bugs-admin" data-label="Báo lỗi từ người dùng" onclick="showTab('tab-bugs-admin', this)">🐞 Báo lỗi từ người dùng</button>
+      <button class="nav-item" data-tab="tab-profile-admin" data-label="Hồ sơ cá nhân" onclick="showTab('tab-profile-admin', this)">👤 Hồ sơ cá nhân</button>
+    </div>
+
+    <div class="sidebar-foot">
+      <button class="btn btn-ghost btn-block btn-sm" style="color:#fff; border-color: rgba(255,255,255,0.2);" onclick="logoutAndRedirect()">Đăng xuất</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <div>
+          <h1 class="js-page-title">Dashboard tổng quan</h1>
+          <div class="topbar-sub">Hệ thống quản trị vận hành — HURC1</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="user-chip js-user-chip" onclick="showTab('tab-profile-admin')"></div>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- ====== DASHBOARD ====== -->
+      <section class="tab-panel active" id="tab-dashboard">
+        <div class="grid grid-4 mb-24">
+          <div class="card kpi-card"><div class="kpi-icon">💰</div><div class="kpi-label">Tổng doanh thu</div><div class="kpi-value" id="dashRevenue">0đ</div><div class="kpi-delta up">▲ Demo data</div></div>
+          <div class="card kpi-card"><div class="kpi-icon">🎫</div><div class="kpi-label">Tổng vé đã bán</div><div class="kpi-value" id="dashTickets">0</div></div>
+          <div class="card kpi-card"><div class="kpi-icon">👥</div><div class="kpi-label">Khách hàng</div><div class="kpi-value" id="dashCustomers">0</div></div>
+          <div class="card kpi-card"><div class="kpi-icon">🧑‍💼</div><div class="kpi-label">Nhân viên</div><div class="kpi-value" id="dashStaff">0</div></div>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-title">Doanh thu theo ngày (7 ngày qua)</div>
+            <div class="bar-chart" id="revenueBarChart"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Phân bổ loại vé đã bán</div>
+            <div id="ticketTypeBreakdown" class="grid" style="gap:10px;"></div>
+          </div>
+        </div>
+
+        <div class="card mt-24">
+          <div class="section-head"><h2>Hoạt động gần đây</h2></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Mã GD</th><th>Số tiền</th><th>Phương thức</th><th>Thời gian</th></tr></thead>
+              <tbody id="recentActivityBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== BÁO CÁO DOANH THU ====== -->
+      <section class="tab-panel" id="tab-revenue-report">
+        <div class="card">
+          <div class="section-head">
+            <h2>Báo cáo doanh thu chi tiết</h2>
+            <button class="btn btn-ghost btn-sm" onclick="exportReport()">⬇️ Xuất Excel/PDF</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Mã GD</th><th>Khách hàng</th><th>Vé</th><th>Số tiền</th><th>Phương thức</th><th>Thời gian</th></tr></thead>
+              <tbody id="revenueReportBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== ĐỐI SOÁT THANH TOÁN ====== -->
+      <section class="tab-panel" id="tab-recon">
+        <div class="card">
+          <div class="card-title">Đối soát theo phương thức thanh toán</div>
+          <div class="card-sub">So sánh số liệu hệ thống ghi nhận theo từng ví / ngân hàng</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Phương thức</th><th>Số giao dịch</th><th>Tổng tiền</th><th>Trạng thái đối soát</th></tr></thead>
+              <tbody id="reconTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== BÁO CÁO NHÂN SỰ ====== -->
+      <section class="tab-panel" id="tab-hr-report">
+        <div class="card">
+          <div class="card-title">Hiệu suất nhân viên</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Nhân viên</th><th>Vị trí</th><th>Ga trực</th><th>Vé bán (demo)</th><th>Doanh thu (demo)</th></tr></thead>
+              <tbody id="hrReportBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== QUẢN LÝ TUYẾN & GA ====== -->
+      <section class="tab-panel" id="tab-stations-admin">
+        <div class="section-head">
+          <h2>Quản lý tuyến & nhà ga</h2>
+          <button class="btn btn-primary btn-sm" onclick="openModal('addStationModal')">+ Thêm ga mới</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>Tên ga</th><th>Khu vực</th><th>Quận</th><th></th></tr></thead>
+              <tbody id="stationAdminBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== BẢO TRÌ & SỰ CỐ ====== -->
+      <section class="tab-panel" id="tab-maintenance">
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-title">Khai báo bảo trì / sự cố</div>
+            <form onsubmit="submitMaintenance(event)">
+              <div class="field"><label>Nhà ga</label><select id="maintStation"></select></div>
+              <div class="field"><label>Loại sự cố</label>
+                <select id="maintType"><option>Bảo trì định kỳ</option><option>Sự cố kỹ thuật</option><option>Sự cố mất điện</option><option>Khác</option></select>
+              </div>
+              <div class="field"><label>Mô tả</label><textarea id="maintDesc" rows="3"></textarea></div>
+              <button class="btn btn-primary" type="submit">Khai báo & thông báo khách hàng</button>
+            </form>
+          </div>
+          <div class="card">
+            <div class="card-title">Sự cố đang ghi nhận</div>
+            <div id="maintenanceListBox" class="grid" style="gap:10px;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== QUẢN LÝ KHÁCH HÀNG ====== -->
+      <section class="tab-panel" id="tab-customers-admin">
+        <div class="card">
+          <div class="section-head">
+            <h2>Danh sách khách hàng</h2>
+            <input type="search" id="customerSearch" placeholder="🔍 Tìm khách hàng..." style="max-width:220px;" oninput="renderCustomersAdmin(this.value)">
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Mã KH</th><th>Họ tên</th><th>Email</th><th>Loại</th><th>Số dư ví</th><th></th></tr></thead>
+              <tbody id="customersAdminBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== QUẢN LÝ NHÂN VIÊN ====== -->
+      <section class="tab-panel" id="tab-staff-admin">
+        <div class="section-head">
+          <h2>Quản lý nhân viên</h2>
+          <button class="btn btn-primary btn-sm" onclick="openModal('addStaffModal')">+ Thêm nhân viên</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Mã NV</th><th>Họ tên</th><th>Vị trí</th><th>Ga trực</th><th>Email</th><th></th></tr></thead>
+              <tbody id="staffAdminBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== PHÂN CA LÀM VIỆC ====== -->
+      <section class="tab-panel" id="tab-shifts-admin">
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-title">Phân ca mới</div>
+            <form onsubmit="assignShift(event)">
+              <div class="field"><label>Nhân viên</label><select id="shiftStaffSelect"></select></div>
+              <div class="field"><label>Ngày</label><input type="date" id="shiftDate" required></div>
+              <div class="field"><label>Ca làm</label>
+                <select id="shiftTime"><option>06:00 - 14:00</option><option>14:00 - 22:00</option><option>22:00 - 06:00</option></select>
+              </div>
+              <div class="field"><label>Ga trực</label><select id="shiftStation"></select></div>
+              <button class="btn btn-primary" type="submit">Phân ca</button>
+            </form>
+          </div>
+          <div class="card">
+            <div class="card-title">Lịch phân ca toàn hệ thống</div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Nhân viên</th><th>Ngày</th><th>Ca</th><th>Ga</th></tr></thead>
+                <tbody id="allShiftsBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== QUẢN LÝ KHUYẾN MÃI ====== -->
+      <section class="tab-panel" id="tab-promo-admin">
+        <div class="section-head">
+          <h2>Quản lý khuyến mãi</h2>
+          <button class="btn btn-primary btn-sm" onclick="openModal('addPromoModal')">+ Tạo khuyến mãi</button>
+        </div>
+        <div class="grid grid-2" id="promoAdminBox"></div>
+      </section>
+
+      <!-- ====== PHẢN HỒI KHÁCH HÀNG ====== -->
+      <section class="tab-panel" id="tab-feedback-admin">
+        <div class="card">
+          <div class="card-title">Phản hồi & đánh giá từ khách hàng</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Khách hàng</th><th>Đánh giá</th><th>Nội dung</th><th>Ngày</th><th>Trạng thái</th><th></th></tr></thead>
+              <tbody id="feedbackAdminBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== LOST & FOUND (ADMIN) ====== -->
+      <section class="tab-panel" id="tab-lostfound-admin">
+        <div class="card">
+          <div class="card-title">Quản lý Lost & Found toàn hệ thống</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Mã</th><th>Đồ vật</th><th>Ga</th><th>Ngày</th><th>Trạng thái</th></tr></thead>
+              <tbody id="lostFoundAdminBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== GỬI THÔNG BÁO ====== -->
+      <section class="tab-panel" id="tab-notif-admin">
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-title">Soạn thông báo mới</div>
+            <form onsubmit="sendBroadcastNotif(event)">
+              <div class="field"><label>Tiêu đề</label><input type="text" id="notifTitle" required></div>
+              <div class="field"><label>Nội dung</label><textarea id="notifMsg" rows="3" required></textarea></div>
+              <button class="btn btn-primary" type="submit">📢 Gửi đến tất cả khách hàng</button>
+            </form>
+          </div>
+          <div class="card">
+            <div class="card-title">Thông báo đã gửi</div>
+            <div id="notifAdminList" class="grid" style="gap:10px;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== BÁO LỖI TỪ NGƯỜI DÙNG ====== -->
+      <section class="tab-panel" id="tab-bugs-admin">
+        <div class="card">
+          <div class="card-title">Báo lỗi / góp ý từ người dùng</div>
+          <div class="empty-state">
+            <div class="ico">🐞</div>
+            <strong>Chưa có báo lỗi nào trong phiên demo này</strong>
+            <div class="text-sm">Các báo lỗi khách hàng gửi từ mục Hỗ trợ sẽ hiển thị tại đây.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== HỒ SƠ CÁ NHÂN (ADMIN) ====== -->
+      <section class="tab-panel" id="tab-profile-admin">
+        <div class="card" style="max-width:480px;">
+          <div class="card-title">Thông tin quản trị viên</div>
+          <form onsubmit="saveAdminProfile(event)">
+            <div class="field"><label>Họ và tên</label><input type="text" id="adName"></div>
+            <div class="field"><label>Email</label><input type="email" id="adEmail" disabled></div>
+            <div class="field"><label>Số điện thoại</label><input type="tel" id="adPhone"></div>
+            <div class="field"><label>Vị trí</label><input type="text" id="adPosition" disabled></div>
+            <button class="btn btn-primary" type="submit">Lưu thay đổi</button>
+          </form>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+<div class="modal-overlay" id="addStationModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Thêm nhà ga mới</h3><button class="modal-close" onclick="closeModal('addStationModal')">✕</button></div>
+    <form onsubmit="addStationSubmit(event)">
+      <div class="field"><label>Tên ga</label><input type="text" id="newStationName" required></div>
+      <div class="field"><label>Khu vực</label><select id="newStationZone"><option>Ngầm</option><option>Trên cao</option></select></div>
+      <div class="field"><label>Quận</label><input type="text" id="newStationDistrict" required></div>
+      <button class="btn btn-primary btn-block" type="submit">Thêm ga</button>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" id="addStaffModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Thêm nhân viên mới</h3><button class="modal-close" onclick="closeModal('addStaffModal')">✕</button></div>
+    <form onsubmit="addStaffSubmit(event)">
+      <div class="field"><label>Họ và tên</label><input type="text" id="newStaffName" required></div>
+      <div class="field"><label>Email</label><input type="email" id="newStaffEmail" required></div>
+      <div class="field"><label>Số điện thoại</label><input type="tel" id="newStaffPhone" required></div>
+      <div class="field"><label>Vị trí</label>
+        <select id="newStaffPosition"><option>Nhân viên bán vé</option><option>Nhân viên kiểm vé</option><option>Nhân viên kỹ thuật</option></select>
+      </div>
+      <div class="field"><label>Ga trực</label><select id="newStaffStation"></select></div>
+      <button class="btn btn-primary btn-block" type="submit">Thêm nhân viên</button>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" id="addPromoModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Tạo khuyến mãi mới</h3><button class="modal-close" onclick="closeModal('addPromoModal')">✕</button></div>
+    <form onsubmit="addPromoSubmit(event)">
+      <div class="field"><label>Tên khuyến mãi</label><input type="text" id="newPromoName" required></div>
+      <div class="field"><label>Mô tả</label><textarea id="newPromoDesc" rows="3" required></textarea></div>
+      <button class="btn btn-primary btn-block" type="submit">Tạo khuyến mãi</button>
+    </form>
+  </div>
+</div>
+
+<script src="assets/js/db.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/quan-ly.js"></script>
+</body>
+</html>

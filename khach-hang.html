@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Khách hàng — HCMC Metro</title>
+<link rel="stylesheet" href="assets/css/style.css">
+<style>
+  .station-search-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 700px) { .station-search-grid { grid-template-columns: 1fr; } }
+  .ticket-type-card { border: 2px solid var(--line-soft); border-radius: var(--radius-md); padding: 18px; cursor: pointer; transition: 0.15s; }
+  .ticket-type-card.active { border-color: var(--blue-600); background: var(--bg-soft); }
+  .ticket-type-card .price { font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; color: var(--blue-700); margin: 6px 0; }
+  .pay-method { display: flex; align-items: center; gap: 12px; border: 1.5px solid var(--line-soft); border-radius: var(--radius-sm); padding: 13px 16px; cursor: pointer; }
+  .pay-method.active { border-color: var(--blue-600); background: var(--bg-soft); }
+  .pay-method input { width: auto; }
+  .qr-ticket-card { display: flex; gap: 18px; align-items: center; }
+  .ticket-list-card { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .rating-stars { font-size: 1.6rem; letter-spacing: 4px; cursor: pointer; color: var(--line-soft); }
+  .rating-stars span.active { color: var(--warn-600); }
+  .faq-item { border-bottom: 1px solid var(--line-soft); padding: 14px 0; cursor: pointer; }
+  .faq-item .faq-a { display: none; color: var(--ink-500); font-size: 0.86rem; margin-top: 8px; line-height: 1.6; }
+  .faq-item.open .faq-a { display: block; }
+  .chat-window { height: 360px; border: 1px solid var(--line-soft); border-radius: var(--radius-md); padding: 16px; overflow-y: auto; background: var(--bg-app); display: flex; flex-direction: column; gap: 10px; }
+  .chat-msg { max-width: 75%; padding: 9px 13px; border-radius: 12px; font-size: 0.85rem; }
+  .chat-msg.user { align-self: flex-end; background: var(--blue-600); color: #fff; }
+  .chat-msg.agent { align-self: flex-start; background: #fff; border: 1px solid var(--line-soft); }
+  .station-mini-card { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--line-soft); cursor: pointer; }
+  .station-mini-card:hover { background: var(--bg-soft); }
+  .station-num { width: 30px; height: 30px; border-radius: 50%; background: var(--blue-600); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">M1</div>
+      <div class="brand-text"><strong>HCMC Metro</strong><span>Khách hàng</span></div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Tổng quan</div>
+      <button class="nav-item active" data-tab="tab-home" data-label="Trang chủ" onclick="showTab('tab-home', this)">🏠 Trang chủ</button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Tài khoản</div>
+      <button class="nav-item" data-tab="tab-profile" data-label="Hồ sơ cá nhân" onclick="showTab('tab-profile', this)">👤 Hồ sơ cá nhân</button>
+      <button class="nav-item" data-tab="tab-security" data-label="Bảo mật & đăng nhập" onclick="showTab('tab-security', this)">🔒 Bảo mật & đăng nhập</button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Tra cứu tuyến</div>
+      <button class="nav-item" data-tab="tab-route" data-label="Tra cứu tuyến metro" onclick="showTab('tab-route', this)">🗺️ Tra cứu tuyến</button>
+      <button class="nav-item" data-tab="tab-stations" data-label="Danh sách nhà ga" onclick="showTab('tab-stations', this)">📍 Danh sách nhà ga</button>
+      <button class="nav-item" data-tab="tab-schedule" data-label="Giờ tàu chạy" onclick="showTab('tab-schedule', this)">🕒 Giờ tàu chạy</button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Vé của tôi</div>
+      <button class="nav-item" data-tab="tab-buy" data-label="Mua vé" onclick="showTab('tab-buy', this)">🎫 Mua vé</button>
+      <button class="nav-item" data-tab="tab-mytickets" data-label="Vé của tôi" onclick="showTab('tab-mytickets', this)">📇 Vé của tôi</button>
+      <button class="nav-item" data-tab="tab-history" data-label="Lịch sử giao dịch" onclick="showTab('tab-history', this)">🧾 Lịch sử giao dịch</button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Thanh toán</div>
+      <button class="nav-item" data-tab="tab-wallet" data-label="Ví & phương thức" onclick="showTab('tab-wallet', this)">💳 Ví & phương thức</button>
+      <button class="nav-item" data-tab="tab-promo" data-label="Khuyến mãi" onclick="showTab('tab-promo', this)">🎁 Khuyến mãi</button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Hỗ trợ</div>
+      <button class="nav-item" data-tab="tab-notifications" data-label="Thông báo" onclick="showTab('tab-notifications', this)">🔔 Thông báo</button>
+      <button class="nav-item" data-tab="tab-support" data-label="Hỗ trợ & CSKH" onclick="showTab('tab-support', this)">💬 Hỗ trợ & CSKH</button>
+      <button class="nav-item" data-tab="tab-feedback" data-label="Đánh giá dịch vụ" onclick="showTab('tab-feedback', this)">⭐ Đánh giá dịch vụ</button>
+      <button class="nav-item" data-tab="tab-lostfound" data-label="Lost & Found" onclick="showTab('tab-lostfound', this)">🧳 Lost & Found</button>
+      <button class="nav-item" data-tab="tab-faq" data-label="Câu hỏi thường gặp" onclick="showTab('tab-faq', this)">❓ FAQ</button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Tiện ích</div>
+      <button class="nav-item" data-tab="tab-settings" data-label="Cài đặt" onclick="showTab('tab-settings', this)">⚙️ Cài đặt</button>
+    </div>
+
+    <div class="sidebar-foot">
+      <button class="btn btn-ghost btn-block btn-sm" style="color:#fff; border-color: rgba(255,255,255,0.2);" onclick="logoutAndRedirect()">Đăng xuất</button>
+    </div>
+  </aside>
+
+  <!-- ===================== MAIN ===================== -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <div>
+          <h1 class="js-page-title">Trang chủ</h1>
+          <div class="topbar-sub">Tuyến Metro số 1 — Bến Thành ⟷ Suối Tiên</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-ghost btn-sm" onclick="showTab('tab-notifications')">🔔 <span id="notifCount"></span></button>
+        <div class="user-chip js-user-chip" onclick="showTab('tab-profile')"></div>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- ============== TAB: TRANG CHỦ ============== -->
+      <section class="tab-panel active" id="tab-home">
+        <div class="grid grid-4 mb-24">
+          <div class="card kpi-card">
+            <div class="kpi-icon">🎫</div>
+            <div class="kpi-label">Vé còn hiệu lực</div>
+            <div class="kpi-value" id="homeActiveTickets">0</div>
+          </div>
+          <div class="card kpi-card">
+            <div class="kpi-icon">💰</div>
+            <div class="kpi-label">Số dư ví</div>
+            <div class="kpi-value" id="homeWallet">0đ</div>
+          </div>
+          <div class="card kpi-card">
+            <div class="kpi-icon">🧾</div>
+            <div class="kpi-label">Tổng chi tiêu</div>
+            <div class="kpi-value" id="homeSpent">0đ</div>
+          </div>
+          <div class="card kpi-card">
+            <div class="kpi-icon">🔔</div>
+            <div class="kpi-label">Thông báo mới</div>
+            <div class="kpi-value" id="homeNotifCount">0</div>
+          </div>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-title">Mua vé nhanh</div>
+            <div class="card-sub">Chọn ga đi và ga đến để xem giá vé ngay</div>
+            <div class="station-search-grid">
+              <div class="field" style="margin-bottom:0;">
+                <label>Ga đi</label>
+                <select id="quickFrom"></select>
+              </div>
+              <div class="field" style="margin-bottom:0;">
+                <label>Ga đến</label>
+                <select id="quickTo"></select>
+              </div>
+            </div>
+            <div class="flex-between mt-16">
+              <div class="text-sm text-muted">Giá vé dự kiến</div>
+              <div class="kpi-value" id="quickFare" style="font-size:1.3rem;">—</div>
+            </div>
+            <button class="btn btn-primary btn-block mt-16" onclick="goToBuyWithRoute()">Mua vé ngay</button>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Cảnh báo & vận hành</div>
+            <div class="card-sub">Thông tin mới nhất từ hệ thống</div>
+            <div id="homeAlerts" class="grid" style="gap:10px;"></div>
+          </div>
+        </div>
+
+        <div class="card mt-24">
+          <div class="section-head">
+            <h2>Vé gần đây</h2>
+            <button class="btn btn-ghost btn-sm" onclick="showTab('tab-mytickets', document.querySelector('[data-tab=tab-mytickets]'))">Xem tất cả</button>
+          </div>
+          <div id="homeRecentTickets"></div>
+        </div>
+      </section>
+
+      <!-- ============== TAB: MUA VÉ ============== -->
+      <section class="tab-panel" id="tab-buy">
+        <div class="pill-tabs mb-24" id="buyTypeTabs">
+          <button class="pill-tab active" data-type="luot" onclick="selectBuyType('luot', this)">Vé lượt</button>
+          <button class="pill-tab" data-type="ngay" onclick="selectBuyType('ngay', this)">Vé ngày</button>
+          <button class="pill-tab" data-type="ba_ngay" onclick="selectBuyType('ba_ngay', this)">Vé 3 ngày</button>
+          <button class="pill-tab" data-type="thang" onclick="selectBuyType('thang', this)">Vé tháng</button>
+          <button class="pill-tab" data-type="nhom" onclick="selectBuyType('nhom', this)">Vé nhóm</button>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <!-- VÉ LƯỢT -->
+            <div id="buyPanel-luot">
+              <div class="card-title">Mua vé lượt (1 chiều)</div>
+              <div class="card-sub">Giá vé tính theo quãng đường di chuyển</div>
+              <div class="field"><label>Ga đi</label><select id="buyFrom"></select></div>
+              <div class="field"><label>Ga đến</label><select id="buyTo"></select></div>
+              <div class="field"><label>Ngày đi</label><input type="date" id="buyDate"></div>
+              <div class="flex-between"><span class="text-sm text-muted">Giá vé</span><strong id="buyFare" class="kpi-value" style="font-size:1.2rem;">—</strong></div>
+            </div>
+
+            <!-- VÉ NGÀY -->
+            <div id="buyPanel-ngay" style="display:none;">
+              <div class="card-title">Vé 1 ngày</div>
+              <div class="card-sub">Không giới hạn số lượt đi trong ngày</div>
+              <div class="ticket-type-card active"><div>Vé ngày — toàn tuyến</div><div class="price">40.000đ</div><div class="text-sm text-muted">Hiệu lực 24h kể từ lần quét đầu tiên</div></div>
+              <div class="field mt-16"><label>Ngày sử dụng</label><input type="date" id="buyDateNgay"></div>
+            </div>
+
+            <!-- VÉ 3 NGÀY -->
+            <div id="buyPanel-ba_ngay" style="display:none;">
+              <div class="card-title">Vé 3 ngày</div>
+              <div class="card-sub">Không giới hạn số lượt đi trong 3 ngày liên tiếp</div>
+              <div class="ticket-type-card active"><div>Vé 3 ngày — toàn tuyến</div><div class="price">90.000đ</div><div class="text-sm text-muted">Hiệu lực 72h kể từ lần quét đầu tiên</div></div>
+              <div class="field mt-16"><label>Ngày bắt đầu</label><input type="date" id="buyDateBaNgay"></div>
+            </div>
+
+            <!-- VÉ THÁNG -->
+            <div id="buyPanel-thang" style="display:none;">
+              <div class="card-title">Vé tháng</div>
+              <div class="card-sub">Đăng ký hoặc gia hạn vé tháng (30 ngày)</div>
+              <div class="grid grid-2">
+                <div class="ticket-type-card active" id="monthlyNormal" onclick="selectMonthly('normal')"><div>Phổ thông</div><div class="price">300.000đ</div></div>
+                <div class="ticket-type-card" id="monthlyHssv" onclick="selectMonthly('hssv')"><div>HSSV (-50%)</div><div class="price">150.000đ</div></div>
+              </div>
+              <div class="field mt-16">
+                <label>Hành động</label>
+                <select id="monthlyAction"><option value="new">Đăng ký mới</option><option value="renew">Gia hạn vé đang có</option></select>
+              </div>
+            </div>
+
+            <!-- VÉ NHÓM -->
+            <div id="buyPanel-nhom" style="display:none;">
+              <div class="card-title">Vé nhóm / gia đình</div>
+              <div class="card-sub">Mua nhiều vé lượt cùng lúc, giảm 10% từ 4 người</div>
+              <div class="field"><label>Ga đi</label><select id="groupFrom"></select></div>
+              <div class="field"><label>Ga đến</label><select id="groupTo"></select></div>
+              <div class="field"><label>Số lượng vé</label><input type="number" id="groupQty" value="4" min="2" max="20" oninput="calcGroupFare()"></div>
+              <div class="flex-between"><span class="text-sm text-muted">Tổng tiền (đã giảm nếu ≥4)</span><strong id="groupFare" class="kpi-value" style="font-size:1.2rem;">—</strong></div>
+            </div>
+
+            <hr class="divider">
+            <button class="btn btn-primary btn-block" onclick="proceedToPayment()">Tiếp tục thanh toán</button>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Áp dụng ưu đãi</div>
+            <div class="field">
+              <label>Mã giảm giá (Voucher)</label>
+              <div class="input-group">
+                <input type="text" id="voucherCode" placeholder="VD: METRO30">
+                <button class="btn btn-ghost" onclick="applyVoucher()">Áp dụng</button>
+              </div>
+              <div class="field-hint" id="voucherMsg"></div>
+            </div>
+            <hr class="divider">
+            <div class="card-title" style="font-size:0.88rem;">Đối tượng miễn/giảm vé</div>
+            <ul class="text-sm" style="padding-left:18px; color:var(--ink-700); line-height:1.8;">
+              <li>Miễn phí: người có công, khuyết tật, người ≥60 tuổi, trẻ em &lt;6 tuổi</li>
+              <li>Giảm 50%: học sinh, sinh viên có thẻ xác thực</li>
+              <li>Giảm 20%: vé lượt khung giờ thấp điểm (9h–16h)</li>
+            </ul>
+            <button class="btn btn-ghost btn-block mt-16" onclick="showTab('tab-profile', document.querySelector('[data-tab=tab-profile]'))">Xác minh đối tượng ưu đãi</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== TAB: VÉ CỦA TÔI ============== -->
+      <section class="tab-panel" id="tab-mytickets">
+        <div class="section-head">
+          <h2>Vé của tôi</h2>
+          <div class="pill-tabs" id="ticketFilterTabs">
+            <button class="pill-tab active" data-f="all" onclick="filterTickets('all', this)">Tất cả</button>
+            <button class="pill-tab" data-f="active" onclick="filterTickets('active', this)">Còn hiệu lực</button>
+            <button class="pill-tab" data-f="used" onclick="filterTickets('used', this)">Đã dùng / hết hạn</button>
+          </div>
+        </div>
+        <div class="grid" style="gap:16px;" id="myTicketsBox"></div>
+      </section>
+
+      <!-- ============== TAB: LỊCH SỬ GIAO DỊCH ============== -->
+      <section class="tab-panel" id="tab-history">
+        <div class="card">
+          <div class="card-title">Lịch sử giao dịch</div>
+          <div class="card-sub">Toàn bộ giao dịch mua vé và nạp ví của bạn</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Mã GD</th><th>Vé liên quan</th><th>Số tiền</th><th>Phương thức</th><th>Trạng thái</th><th>Thời gian</th><th></th></tr></thead>
+              <tbody id="historyTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      <section class="tab-panel" id="tab-profile">
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-title">Thông tin cá nhân</div>
+            <div class="card-sub">Xem và cập nhật thông tin của bạn</div>
+            <form onsubmit="saveProfile(event)">
+              <div class="field"><label>Họ và tên</label><input type="text" id="pfName"></div>
+              <div class="field"><label>Email</label><input type="email" id="pfEmail" disabled></div>
+              <div class="field"><label>Số điện thoại</label><input type="tel" id="pfPhone"></div>
+              <div class="field">
+                <label>Loại hành khách</label>
+                <select id="pfType">
+                  <option value="Phổ thông">Phổ thông</option>
+                  <option value="Sinh viên">Học sinh / Sinh viên</option>
+                  <option value="Người cao tuổi">Người cao tuổi (từ 60 tuổi)</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" type="submit">Lưu thay đổi</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Xác minh thẻ HSSV / Người cao tuổi</div>
+            <div class="card-sub">Xác minh để được áp dụng giảm giá tự động khi mua vé</div>
+            <div class="field"><label>Loại giấy tờ</label>
+              <select id="verifyDocType"><option>Thẻ học sinh / sinh viên</option><option>CCCD (người cao tuổi)</option><option>Giấy xác nhận người có công / khuyết tật</option></select>
+            </div>
+            <div class="field"><label>Số giấy tờ</label><input type="text" placeholder="VD: 079123456789"></div>
+            <button class="btn btn-accent" onclick="toast('Đã gửi yêu cầu xác minh, kết quả trong 24h.', 'ok')">Gửi xác minh</button>
+            <hr class="divider">
+            <div class="card-title" style="font-size:0.88rem;">Liên kết CCCD gắn chip</div>
+            <p class="text-sm text-muted mb-16">Liên kết để quét thẻ CCCD trực tiếp tại cổng soát vé thay vì dùng vé QR.</p>
+            <button class="btn btn-ghost btn-block" onclick="toast('Đã liên kết CCCD gắn chip với vé tháng của bạn.', 'ok')">🪪 Liên kết CCCD với vé tháng</button>
+          </div>
+        </div>
+
+        <div class="card mt-24">
+          <div class="flex-between">
+            <div>
+              <div class="card-title" style="margin-bottom:0;">Xóa tài khoản</div>
+              <div class="text-sm text-muted">Yêu cầu xóa toàn bộ dữ liệu tài khoản của bạn khỏi hệ thống</div>
+            </div>
+            <button class="btn btn-danger" onclick="confirmDeleteAccount()">Xóa tài khoản</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== TAB: BẢO MẬT & ĐĂNG NHẬP ============== -->
+      <section class="tab-panel" id="tab-security">
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-title">Đổi mật khẩu</div>
+            <form onsubmit="changePassword(event)">
+              <div class="field"><label>Mật khẩu hiện tại</label><input type="password" id="curPass" required></div>
+              <div class="field"><label>Mật khẩu mới</label><input type="password" id="newPass2" minlength="6" required></div>
+              <button class="btn btn-primary" type="submit">Đổi mật khẩu</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Bảo mật đăng nhập</div>
+            <div class="toggle-row">
+              <div><strong>Xác thực 2 lớp (2FA)</strong><div class="text-sm text-muted">Yêu cầu mã OTP mỗi lần đăng nhập trên thiết bị mới</div></div>
+              <label class="switch"><input type="checkbox" id="toggle2fa" onchange="toast(this.checked ? 'Đã bật xác thực 2 lớp.' : 'Đã tắt xác thực 2 lớp.', 'ok')"><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div><strong>Đăng nhập bằng số điện thoại + OTP</strong><div class="text-sm text-muted">Cho phép đăng nhập không cần mật khẩu</div></div>
+              <label class="switch"><input type="checkbox" onchange="toast('Đã cập nhật cài đặt đăng nhập OTP.', 'ok')"><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row" style="border-bottom:none;">
+              <div><strong>Đăng nhập bằng Google / Facebook</strong><div class="text-sm text-muted">Liên kết tài khoản mạng xã hội</div></div>
+              <button class="btn btn-ghost btn-sm" onclick="toast('Đã liên kết tài khoản Google (demo).', 'ok')">Liên kết</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mt-24">
+          <div class="card-title">Lịch sử đăng nhập</div>
+          <div class="card-sub">Phát hiện đăng nhập lạ để bảo vệ tài khoản của bạn</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Thời gian</th><th>Thiết bị</th><th>Vị trí</th><th>Trạng thái</th></tr></thead>
+              <tbody>
+                <tr><td>26/06/2026 08:14</td><td>Chrome trên Windows</td><td>TP. Hồ Chí Minh</td><td><span class="badge badge-ok">Hiện tại</span></td></tr>
+                <tr><td>24/06/2026 19:02</td><td>Safari trên iPhone</td><td>TP. Hồ Chí Minh</td><td><span class="badge badge-info">Đã đăng xuất</span></td></tr>
+                <tr><td>20/06/2026 07:55</td><td>Chrome trên Android</td><td>TP. Hồ Chí Minh</td><td><span class="badge badge-info">Đã đăng xuất</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== TAB: TRA CỨU TUYẾN ============== -->
+      <section class="tab-panel" id="tab-route">
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-title">Tìm tuyến nhanh</div>
+            <div class="card-sub">Nhập ga đi và ga đến để xem hành trình</div>
+            <div class="field"><label>Ga đi</label><select id="routeFrom"></select></div>
+            <div class="field"><label>Ga đến</label><select id="routeTo"></select></div>
+            <button class="btn btn-primary btn-block" onclick="renderRoute()">Tìm tuyến</button>
+
+            <div class="mt-24" id="routeResultBox" style="display:none;">
+              <div class="flex-between mb-16">
+                <div><div class="text-sm text-muted">Thời gian dự kiến</div><strong id="routeTime">—</strong></div>
+                <div><div class="text-sm text-muted">Số ga đi qua</div><strong id="routeStops">—</strong></div>
+                <div><div class="text-sm text-muted">Giá vé</div><strong id="routeFare">—</strong></div>
+              </div>
+              <div class="route-track" id="routeTrack"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Gợi ý tuyến thay thế</div>
+            <div class="card-sub">Khi ga đóng/bảo trì, hệ thống gợi ý phương án khác</div>
+            <div id="alternativeRouteBox" class="empty-state">
+              <div class="ico">🛤️</div>
+              <strong>Hiện tại tất cả các ga đang hoạt động bình thường</strong>
+              <div class="text-sm">Không cần phương án thay thế.</div>
+            </div>
+            <hr class="divider">
+            <div class="card-title" style="font-size:0.88rem;">Xe buýt kết nối</div>
+            <p class="text-sm text-muted">Tuyến 166: Đại học Quốc gia ⟷ Suối Tiên · Tuyến 168: ĐH Sư phạm Kỹ thuật ⟷ Ngã tư Bình Thái</p>
+            <hr class="divider">
+            <div class="card-title" style="font-size:0.88rem;">⚠️ Cảnh báo giờ cao điểm</div>
+            <p class="text-sm text-muted">Khung giờ 6h30–8h và 17h–19h thường đông khách. Hãy cân nhắc đi sớm hoặc muộn hơn.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== TAB: DANH SÁCH NHÀ GA ============== -->
+      <section class="tab-panel" id="tab-stations">
+        <div class="card">
+          <div class="section-head">
+            <h2>14 nhà ga trên tuyến Metro số 1</h2>
+            <input type="search" placeholder="🔍 Tìm ga..." id="stationSearchInput" style="max-width:220px;" oninput="renderStationList(this.value)">
+          </div>
+          <div class="grid grid-2" id="stationListBox"></div>
+        </div>
+      </section>
+
+      <!-- ============== TAB: GIỜ TÀU CHẠY ============== -->
+      <section class="tab-panel" id="tab-schedule">
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-title">Tra cứu giờ hoạt động</div>
+            <div class="field"><label>Chọn nhà ga</label><select id="scheduleStation"></select></div>
+            <button class="btn btn-primary btn-block" onclick="renderSchedule()">Xem giờ tàu</button>
+            <div class="mt-16" id="scheduleResult"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Thông tin chung</div>
+            <ul class="text-sm" style="padding-left: 18px; color: var(--ink-700); line-height:1.9;">
+              <li>Giờ hoạt động: <strong>5h00 – 22h00</strong> hàng ngày</li>
+              <li>Tần suất giờ thường: <strong>8–12 phút/chuyến</strong></li>
+              <li>Tần suất giờ cao điểm: <strong>5–6 phút/chuyến</strong></li>
+              <li>Thời gian toàn tuyến: <strong>~30 phút</strong></li>
+            </ul>
+            <hr class="divider">
+            <div class="toggle-row" style="border-bottom:none;">
+              <div><strong>🔔 Cảnh báo tàu trễ</strong><div class="text-sm text-muted">Nhận thông báo khi tàu trễ trên ga bạn theo dõi</div></div>
+              <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== TAB: VÍ & PHƯƠNG THỨC ============== -->
+      <section class="tab-panel" id="tab-wallet">
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-title">Ví điện tử nội bộ</div>
+            <div class="card-sub">Nạp tiền vào ví để thanh toán vé nhanh hơn, không cần nhập thẻ mỗi lần</div>
+            <div class="kpi-value mb-16" id="walletBalance" style="font-size:2rem;">0đ</div>
+            <div class="input-group mb-16">
+              <input type="number" id="topupAmount" placeholder="Nhập số tiền cần nạp">
+              <button class="btn btn-primary" onclick="topUp()">Nạp tiền</button>
+            </div>
+            <div class="flex gap-8 flex-wrap">
+              <button class="btn btn-ghost btn-sm" onclick="document.getElementById('topupAmount').value=50000">+50.000đ</button>
+              <button class="btn btn-ghost btn-sm" onclick="document.getElementById('topupAmount').value=100000">+100.000đ</button>
+              <button class="btn btn-ghost btn-sm" onclick="document.getElementById('topupAmount').value=300000">+300.000đ</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Phương thức thanh toán</div>
+            <div class="card-sub">Chọn phương thức mặc định khi thanh toán</div>
+            <div class="grid" style="gap:10px;">
+              <label class="pay-method active"><input type="radio" name="defaultPay" checked> 🏦 Thẻ ngân hàng (Visa/Mastercard/CCCD gắn chip)</label>
+              <label class="pay-method"><input type="radio" name="defaultPay"> 📱 Ví MoMo</label>
+              <label class="pay-method"><input type="radio" name="defaultPay"> 📱 Ví ZaloPay</label>
+              <label class="pay-method"><input type="radio" name="defaultPay"> 💵 Tiền mặt tại quầy</label>
+              <label class="pay-method"><input type="radio" name="defaultPay"> 👛 Ví điện tử nội bộ Metro</label>
+            </div>
+            <button class="btn btn-primary btn-block mt-16" onclick="toast('Đã lưu phương thức thanh toán mặc định.', 'ok')">Lưu mặc định</button>
+          </div>
+        </div>
+
+        <div class="card mt-24">
+          <div class="card-title">Hóa đơn điện tử</div>
+          <div class="card-sub">Xem và xuất hóa đơn PDF cho các giao dịch của bạn</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Mã hóa đơn</th><th>Ngày</th><th>Số tiền</th><th></th></tr></thead>
+              <tbody id="invoiceTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== TAB: KHUYẾN MÃI ============== -->
+      <section class="tab-panel" id="tab-promo">
+        <div class="section-head"><h2>Khuyến mãi đang áp dụng</h2></div>
+        <div class="grid grid-2" id="promoListBox"></div>
+      </section>
+
+      <!-- ============== TAB: THÔNG BÁO ============== -->
+      <section class="tab-panel" id="tab-notifications">
+        <div class="grid" style="grid-template-columns: 2fr 1fr; gap:18px;">
+          <div class="card">
+            <div class="section-head">
+              <h2>Trung tâm thông báo</h2>
+              <button class="btn btn-ghost btn-sm" onclick="markAllRead()">Đánh dấu đã đọc tất cả</button>
+            </div>
+            <div id="notifListBox" class="grid" style="gap:10px;"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Cài đặt thông báo</div>
+            <div class="toggle-row"><div>Cảnh báo tàu trễ</div><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+            <div class="toggle-row"><div>Khuyến mãi & ưu đãi</div><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+            <div class="toggle-row"><div>Bảo trì nhà ga</div><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+            <div class="toggle-row" style="border-bottom:none;"><div>Vé sắp hết hạn</div><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== TAB: HỖ TRỢ & CSKH ============== -->
+      <section class="tab-panel" id="tab-support">
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-title">Chat hỗ trợ trực tuyến</div>
+            <div class="card-sub">Trò chuyện với nhân viên chăm sóc khách hàng</div>
+            <div class="chat-window" id="chatWindow">
+              <div class="chat-msg agent">Xin chào! Tôi có thể giúp gì cho bạn về chuyến đi metro hôm nay? 🚇</div>
+            </div>
+            <div class="input-group mt-16">
+              <input type="text" id="chatInput" placeholder="Nhập tin nhắn..." onkeydown="if(event.key==='Enter') sendChat()">
+              <button class="btn btn-primary" onclick="sendChat()">Gửi</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Gửi phản hồi / báo lỗi ứng dụng</div>
+            <form onsubmit="submitBugReport(event)">
+              <div class="field"><label>Chủ đề</label><input type="text" id="bugSubject" required placeholder="VD: Lỗi khi thanh toán"></div>
+              <div class="field"><label>Mô tả chi tiết</label><textarea id="bugDesc" rows="4" required></textarea></div>
+              <button class="btn btn-primary" type="submit">Gửi báo cáo</button>
+            </form>
+            <hr class="divider">
+            <p class="text-sm text-muted">Hoặc gọi hotline CSKH: <strong>1900 6068</strong> (7h–22h hàng ngày)</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== TAB: ĐÁNH GIÁ DỊCH VỤ ============== -->
+      <section class="tab-panel" id="tab-feedback">
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-title">Đánh giá chuyến đi của bạn</div>
+            <form onsubmit="submitFeedback(event)">
+              <div class="field">
+                <label>Chấm sao</label>
+                <div class="rating-stars" id="ratingStars">
+                  <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
+                </div>
+              </div>
+              <div class="field"><label>Nhận xét</label><textarea id="fbMessage" rows="4" placeholder="Chia sẻ trải nghiệm của bạn..."></textarea></div>
+              <button class="btn btn-primary" type="submit">Gửi đánh giá</button>
+            </form>
+          </div>
+          <div class="card">
+            <div class="card-title">Đánh giá gần đây của bạn</div>
+            <div id="myFeedbackBox" class="grid" style="gap:10px;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== TAB: LOST & FOUND ============== -->
+      <section class="tab-panel" id="tab-lostfound">
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-title">Báo mất đồ</div>
+            <div class="card-sub">Gửi yêu cầu hỗ trợ tìm lại đồ vật bị mất trên tàu hoặc tại ga</div>
+            <form onsubmit="submitLostItem(event)">
+              <div class="field"><label>Tên đồ vật</label><input type="text" id="lfItem" required placeholder="VD: Ví da màu nâu"></div>
+              <div class="field"><label>Ga / khu vực bị mất</label><select id="lfStation"></select></div>
+              <button class="btn btn-primary" type="submit">Gửi yêu cầu</button>
+            </form>
+          </div>
+          <div class="card">
+            <div class="card-title">Yêu cầu của bạn</div>
+            <div id="myLostFoundBox" class="grid" style="gap:10px;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== TAB: FAQ ============== -->
+      <section class="tab-panel" id="tab-faq">
+        <div class="card">
+          <div class="card-title">Câu hỏi thường gặp</div>
+          <div id="faqListBox"></div>
+        </div>
+      </section>
+
+      <!-- ============== TAB: CÀI ĐẶT ============== -->
+      <section class="tab-panel" id="tab-settings">
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-title">Ngôn ngữ & hiển thị</div>
+            <div class="field">
+              <label>Ngôn ngữ</label>
+              <select id="langSelect" onchange="toast('Đã đổi ngôn ngữ (demo, giao diện vẫn tiếng Việt).', 'ok')">
+                <option value="vi">🇻🇳 Tiếng Việt</option>
+                <option value="en">🇬🇧 English</option>
+              </select>
+            </div>
+            <div class="toggle-row" style="border-bottom:none;">
+              <div><strong>♿ Chế độ hỗ trợ người khuyết tật</strong><div class="text-sm text-muted">Tăng kích thước chữ và tương phản màu</div></div>
+              <label class="switch"><input type="checkbox" onchange="toggleAccessibility(this.checked)"><span class="slider"></span></label>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Dữ liệu demo</div>
+            <p class="text-sm text-muted mb-16">Website đang dùng dữ liệu giả lập lưu trong trình duyệt (localStorage) để demo. Bạn có thể đặt lại toàn bộ dữ liệu về trạng thái ban đầu.</p>
+            <button class="btn btn-danger" onclick="if(confirm('Đặt lại toàn bộ dữ liệu demo?')){DB.resetAll(); location.reload();}">Đặt lại dữ liệu demo</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ===================== MODALS ===================== -->
+<div class="modal-overlay" id="paymentModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Chọn phương thức thanh toán</h3><button class="modal-close" onclick="closeModal('paymentModal')">✕</button></div>
+    <div class="flex-between mb-16"><span class="text-muted">Tổng tiền</span><strong id="paymentAmount" class="kpi-value" style="font-size:1.3rem;">0đ</strong></div>
+    <div class="grid" style="gap:10px;" id="paymentMethodList">
+      <label class="pay-method active"><input type="radio" name="payMethod" value="Thẻ ngân hàng" checked> 🏦 Thẻ ngân hàng / CCCD gắn chip</label>
+      <label class="pay-method"><input type="radio" name="payMethod" value="Ví MoMo"> 📱 Ví MoMo</label>
+      <label class="pay-method"><input type="radio" name="payMethod" value="Ví ZaloPay"> 📱 Ví ZaloPay</label>
+      <label class="pay-method"><input type="radio" name="payMethod" value="Ví nội bộ"> 👛 Ví điện tử Metro (số dư hiện tại)</label>
+    </div>
+    <button class="btn btn-primary btn-block mt-24" onclick="confirmPayment()">Xác nhận thanh toán</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="ticketDetailModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Chi tiết vé</h3><button class="modal-close" onclick="closeModal('ticketDetailModal')">✕</button></div>
+    <div id="ticketDetailBody"></div>
+  </div>
+</div>
+
+<script src="assets/js/db.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/khach-hang.js"></script>
+</body>
+</html>
+

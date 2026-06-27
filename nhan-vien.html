@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nhân viên — HCMC Metro</title>
+<link rel="stylesheet" href="assets/css/style.css">
+<style>
+  .scan-box { background: var(--blue-900); border-radius: var(--radius-lg); padding: 40px; text-align:center; color:#fff; }
+  .scan-frame { width: 200px; height: 200px; margin: 0 auto 18px; border: 3px dashed var(--teal-400); border-radius: var(--radius-md); display:flex; align-items:center; justify-content:center; font-size:3rem; }
+  .verify-result { border-radius: var(--radius-md); padding: 18px; margin-top: 18px; }
+  .verify-result.ok { background: var(--ok-100); color: var(--ok-600); }
+  .verify-result.error { background: var(--danger-100); color: var(--danger-600); }
+  .counter-grid { display:grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+  .counter-grid button { padding: 16px; font-size: 1.1rem; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">M1</div>
+      <div class="brand-text"><strong>HCMC Metro</strong><span>Nhân viên</span></div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Tổng quan</div>
+      <button class="nav-item active" data-tab="tab-home" data-label="Trang chủ ca làm" onclick="showTab('tab-home', this)">🏠 Trang chủ ca làm</button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Bán vé</div>
+      <button class="nav-item" data-tab="tab-sell" data-label="Bán vé tại quầy" onclick="showTab('tab-sell', this)">🎫 Bán vé tại quầy</button>
+      <button class="nav-item" data-tab="tab-extra" data-label="Vé bổ sung (quá ga)" onclick="showTab('tab-extra', this)">➕ Vé bổ sung (quá ga)</button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Kiểm soát vé</div>
+      <button class="nav-item" data-tab="tab-scan" data-label="Quét mã QR / kiểm vé" onclick="showTab('tab-scan', this)">📷 Quét mã QR / kiểm vé</button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Ca làm việc</div>
+      <button class="nav-item" data-tab="tab-shift" data-label="Lịch phân ca" onclick="showTab('tab-shift', this)">📅 Lịch phân ca</button>
+      <button class="nav-item" data-tab="tab-shiftreport" data-label="Báo cáo cuối ca" onclick="showTab('tab-shiftreport', this)">📊 Báo cáo cuối ca</button>
+      <button class="nav-item" data-tab="tab-attendance" data-label="Chấm công" onclick="showTab('tab-attendance', this)">⏱️ Chấm công</button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Hỗ trợ</div>
+      <button class="nav-item" data-tab="tab-lostfound-staff" data-label="Xử lý Lost & Found" onclick="showTab('tab-lostfound-staff', this)">🧳 Xử lý Lost & Found</button>
+      <button class="nav-item" data-tab="tab-profile-staff" data-label="Hồ sơ cá nhân" onclick="showTab('tab-profile-staff', this)">👤 Hồ sơ cá nhân</button>
+    </div>
+
+    <div class="sidebar-foot">
+      <button class="btn btn-ghost btn-block btn-sm" style="color:#fff; border-color: rgba(255,255,255,0.2);" onclick="logoutAndRedirect()">Đăng xuất</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <div>
+          <h1 class="js-page-title">Trang chủ ca làm</h1>
+          <div class="topbar-sub">Hệ thống vận hành nhân viên — HURC1</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="user-chip js-user-chip" onclick="showTab('tab-profile-staff')"></div>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- ====== HOME ====== -->
+      <section class="tab-panel active" id="tab-home">
+        <div class="grid grid-4 mb-24">
+          <div class="card kpi-card"><div class="kpi-icon">🎫</div><div class="kpi-label">Vé bán hôm nay</div><div class="kpi-value" id="staffTicketsToday">0</div></div>
+          <div class="card kpi-card"><div class="kpi-icon">💰</div><div class="kpi-label">Doanh thu ca</div><div class="kpi-value" id="staffRevenueToday">0đ</div></div>
+          <div class="card kpi-card"><div class="kpi-icon">📍</div><div class="kpi-label">Ga trực</div><div class="kpi-value" id="staffStation" style="font-size:1.2rem;">—</div></div>
+          <div class="card kpi-card"><div class="kpi-icon">🕒</div><div class="kpi-label">Ca hiện tại</div><div class="kpi-value" id="staffShiftTime" style="font-size:1.2rem;">—</div></div>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-title">Lối tắt thao tác</div>
+            <div class="grid grid-2" style="gap:10px;">
+              <button class="btn btn-primary" onclick="showTab('tab-sell', document.querySelector('[data-tab=tab-sell]'))">🎫 Bán vé mới</button>
+              <button class="btn btn-accent" onclick="showTab('tab-scan', document.querySelector('[data-tab=tab-scan]'))">📷 Quét kiểm vé</button>
+              <button class="btn btn-ghost" onclick="showTab('tab-extra', document.querySelector('[data-tab=tab-extra]'))">➕ Vé bổ sung</button>
+              <button class="btn btn-ghost" onclick="showTab('tab-shiftreport', document.querySelector('[data-tab=tab-shiftreport]'))">📊 Báo cáo ca</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Thông báo vận hành</div>
+            <div id="staffAlerts" class="grid" style="gap:10px;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== BÁN VÉ TẠI QUẦY ====== -->
+      <section class="tab-panel" id="tab-sell">
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-title">Bán vé cho hành khách</div>
+            <div class="card-sub">Nhập thông tin → in vé giấy có mã QR</div>
+            <div class="pill-tabs mb-16" id="sellTypeTabs">
+              <button class="pill-tab active" data-t="luot" onclick="selectSellType('luot', this)">Vé lượt</button>
+              <button class="pill-tab" data-t="ngay" onclick="selectSellType('ngay', this)">Vé ngày</button>
+              <button class="pill-tab" data-t="ba_ngay" onclick="selectSellType('ba_ngay', this)">Vé 3 ngày</button>
+            </div>
+            <div id="sellRouteFields">
+              <div class="field"><label>Ga đi</label><select id="sellFrom"></select></div>
+              <div class="field"><label>Ga đến</label><select id="sellTo"></select></div>
+            </div>
+            <div class="field"><label>Loại hành khách</label>
+              <select id="sellPassengerType">
+                <option value="normal">Phổ thông</option>
+                <option value="hssv">Học sinh / Sinh viên (-50%, chỉ vé tháng)</option>
+                <option value="free">Miễn phí (người có công / khuyết tật / ≥60 tuổi / &lt;6 tuổi)</option>
+              </select>
+            </div>
+            <div class="flex-between mb-16"><span class="text-muted">Giá vé</span><strong id="sellFare" class="kpi-value" style="font-size:1.3rem;">—</strong></div>
+            <div class="field"><label>Phương thức thanh toán</label>
+              <select id="sellPayMethod"><option>Tiền mặt</option><option>Thẻ ngân hàng (POS)</option><option>Chuyển khoản</option></select>
+            </div>
+            <button class="btn btn-primary btn-block" onclick="staffSellTicket()">🖨️ Bán vé & in vé</button>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Vé đã bán gần đây (ca này)</div>
+            <div id="recentSoldBox" class="grid" style="gap:10px;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== VÉ BỔ SUNG (QUÁ GA) ====== -->
+      <section class="tab-panel" id="tab-extra">
+        <div class="card" style="max-width:520px;">
+          <div class="card-title">Hỗ trợ hành khách đi quá ga</div>
+          <div class="card-sub">Tính phần chênh lệch giá vé khi hành khách ra ga xa hơn vé đã mua</div>
+          <div class="field"><label>Ga theo vé đã mua</label><select id="extraOriginalTo"></select></div>
+          <div class="field"><label>Ga thực tế ra</label><select id="extraActualTo"></select></div>
+          <div class="flex-between mb-16"><span class="text-muted">Phụ phí cần thu thêm</span><strong id="extraFare" class="kpi-value" style="font-size:1.3rem;">—</strong></div>
+          <button class="btn btn-primary btn-block" onclick="calcExtraFare()">Tính phụ phí</button>
+          <button class="btn btn-accent btn-block mt-8" onclick="toast('Đã thu phụ phí và cho phép hành khách ra cổng.', 'ok')">Xác nhận thu phí & cho ra ga</button>
+        </div>
+      </section>
+
+      <!-- ====== QUÉT QR / KIỂM VÉ ====== -->
+      <section class="tab-panel" id="tab-scan">
+        <div class="grid grid-2">
+          <div class="scan-box">
+            <div class="scan-frame">📷</div>
+            <p>Hướng camera vào mã QR trên vé hành khách</p>
+            <div class="input-group mt-16">
+              <input type="text" id="manualQrInput" placeholder="Hoặc nhập mã vé/QR thủ công (VD: TK1001)">
+              <button class="btn btn-accent" onclick="verifyTicketAction()">Kiểm tra</button>
+            </div>
+            <div id="verifyResultBox"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Hướng dẫn xử lý</div>
+            <ul class="text-sm" style="padding-left:18px; color: var(--ink-700); line-height:1.9;">
+              <li>✅ Vé hợp lệ → đèn xanh, mở cổng tự động</li>
+              <li>❌ Vé đã sử dụng / hết hạn → yêu cầu mua vé mới</li>
+              <li>❌ Vé đã hủy → từ chối qua cổng, hướng dẫn ra quầy hỗ trợ</li>
+              <li>🪪 Có thể quét CCCD gắn chip thay cho vé QR đối với vé tháng đã liên kết</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== LỊCH PHÂN CA ====== -->
+      <section class="tab-panel" id="tab-shift">
+        <div class="card">
+          <div class="card-title">Lịch phân ca của tôi</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Ngày</th><th>Ca</th><th>Ga trực</th><th>Trạng thái</th></tr></thead>
+              <tbody id="myShiftTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== BÁO CÁO CUỐI CA ====== -->
+      <section class="tab-panel" id="tab-shiftreport">
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-title">Tổng kết ca làm việc</div>
+            <div class="grid grid-2 mb-16" style="gap:12px;">
+              <div class="card" style="box-shadow:none; padding:14px;"><div class="text-sm text-muted">Số vé đã bán</div><strong class="kpi-value" id="reportTicketCount" style="font-size:1.4rem;">0</strong></div>
+              <div class="card" style="box-shadow:none; padding:14px;"><div class="text-sm text-muted">Tổng tiền thu</div><strong class="kpi-value" id="reportRevenue" style="font-size:1.4rem;">0đ</strong></div>
+            </div>
+            <button class="btn btn-primary btn-block" onclick="submitShiftReport()">📤 Gửi báo cáo cuối ca cho quản lý</button>
+          </div>
+          <div class="card">
+            <div class="card-title">Lịch sử báo cáo ca đã gửi</div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Ngày</th><th>Ca</th><th>Vé bán</th><th>Doanh thu</th></tr></thead>
+                <tbody id="shiftHistoryBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== CHẤM CÔNG ====== -->
+      <section class="tab-panel" id="tab-attendance">
+        <div class="card" style="max-width:480px;">
+          <div class="card-title">Chấm công ca làm</div>
+          <div class="card-sub">Ghi nhận giờ vào/ra ca làm việc của bạn</div>
+          <div class="flex-between mb-16"><span class="text-muted">Trạng thái hiện tại</span><span class="badge badge-ok" id="attendanceStatus">Chưa chấm công</span></div>
+          <button class="btn btn-primary btn-block mb-8" onclick="clockIn()">🟢 Chấm công vào ca</button>
+          <button class="btn btn-ghost btn-block" onclick="clockOut()">🔴 Chấm công kết thúc ca</button>
+          <hr class="divider">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Ngày</th><th>Giờ vào</th><th>Giờ ra</th></tr></thead>
+              <tbody id="attendanceHistoryBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== LOST & FOUND (STAFF) ====== -->
+      <section class="tab-panel" id="tab-lostfound-staff">
+        <div class="card">
+          <div class="card-title">Yêu cầu Lost & Found cần xử lý</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Mã</th><th>Đồ vật</th><th>Ga</th><th>Ngày</th><th>Trạng thái</th><th></th></tr></thead>
+              <tbody id="lfStaffTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== HỒ SƠ CÁ NHÂN (STAFF) ====== -->
+      <section class="tab-panel" id="tab-profile-staff">
+        <div class="card" style="max-width:480px;">
+          <div class="card-title">Thông tin nhân viên</div>
+          <form onsubmit="saveStaffProfile(event)">
+            <div class="field"><label>Họ và tên</label><input type="text" id="stName"></div>
+            <div class="field"><label>Email</label><input type="email" id="stEmail" disabled></div>
+            <div class="field"><label>Số điện thoại</label><input type="tel" id="stPhone"></div>
+            <div class="field"><label>Vị trí công việc</label><input type="text" id="stPosition" disabled></div>
+            <div class="field"><label>Ga trực</label><input type="text" id="stStation" disabled></div>
+            <button class="btn btn-primary" type="submit">Lưu thay đổi</button>
+          </form>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script src="assets/js/db.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/nhan-vien.js"></script>
+</body>
+</html>
